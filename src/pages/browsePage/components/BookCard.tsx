@@ -48,11 +48,11 @@ const BookCard: React.FC<BookCardProps> = ({ book /*, onClick */ }) => {
 
   return (
     <div
-      className="bg-white rounded-lg shadow-md overflow-hidden relative cursor-pointer hover:shadow-lg transition-shadow duration-200"
+      className="bg-white rounded-lg shadow-md overflow-hidden relative cursor-pointer hover:shadow-lg transition-shadow duration-200 w-[250px] h-[500px] flex flex-col"
       onClick={handleCardClick}
     >
       {/* Book Image Placeholder */}
-      <div className="w-full h-60 bg-gray-200 flex items-center justify-center text-gray-500 text-sm font-semibold">
+      <div className="w-full h-[350px] bg-gray-200 flex items-center justify-center text-gray-500 text-sm font-semibold overflow-hidden">
         {book.imageUrl ? (
           <img src={book.imageUrl} alt={book.title} className="w-full h-full object-cover" />
         ) : (
@@ -65,10 +65,10 @@ const BookCard: React.FC<BookCardProps> = ({ book /*, onClick */ }) => {
         {book.status}
       </span>
 
-      <div className="p-4">
-        <h3 className="text-lg font-bold text-gray-800 mb-1">{book.title}</h3>
-        <p className="text-gray-600 text-sm mb-2">{book.author}</p>
-        <p className="text-gray-500 text-xs line-clamp-3">
+      <div className="p-4 flex-1 flex flex-col">
+        <h3 className="text-lg font-bold text-gray-800 mb-1 line-clamp-1">{book.title}</h3>
+        <p className="text-gray-600 text-sm mb-2 line-clamp-1">{book.author}</p>
+        <p className="text-gray-500 text-xs line-clamp-3 flex-1">
           {book.description}
         </p>
       </div>
