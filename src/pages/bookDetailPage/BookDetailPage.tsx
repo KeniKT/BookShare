@@ -1,77 +1,60 @@
 // src/pages/bookDetailPage/BookDetailPage.tsx
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom'; // Import useParams
-
-// Importing the new, local components from the 'components' subfolder
+import { useParams, useLocation } from 'react-router-dom';
 import StatusBar from './components/StatusBar';
 
-// Define the type for a Book (matching your mock data structure)
+// Define the type for a Book (matching API fields)
 interface Book {
   id: string;
   imageUrl?: string;
   title: string;
   author: string;
   status: 'Available' | 'Rented' | 'Requested';
-  lender: string;
-  condition: string;
+  lender?: string;
+  condition?: string;
   description: string;
 }
 
-// Mock Book Data Array (to simulate fetching a specific book by ID)
-const allMockBooks: Book[] = [
-  {
-    id: 'book123', // This ID should match the one used in `BookCard.tsx` for navigation
-    imageUrl: 'https://via.placeholder.com/300x450/C0C0C0/FFFFFF?text=Book+Cover',
-    title: "The Hitchhiker's Guide to the Galaxy",
-    author: "Douglas Adams",
-    status: 'Available',
-    lender: 'Jane Doe',
-    condition: 'Good',
-    description: "A hilarious science fiction adventure following the last surviving man from Earth, Arthur Dent, as he travels through space with his alien friend Ford Prefect. Written with dry wit and philosophical absurdity, it's a must-read for fans of satirical science fiction.",
-  },
-  {
-    id: 'browse-book2', // Example: An ID from your BrowsePage mock data
-    imageUrl: 'https://via.placeholder.com/300x450/B3E0C0/FFFFFF?text=Book+Cover+2',
-    title: "Project Hail Mary",
-    author: "Andy Weir",
-    description: "Ryland Grace is the sole survivor on a desperate mission to save humanity, but he can't remember who he is or why he's there. He must piece together his identity and complete his task before it's too late.",
-    status: 'Available',
-    lender: 'Alice Smith',
-    condition: 'Like New',
-  },
-  {
-    id: 'browse-book3', // Example: An ID from your BrowsePage mock data
-    imageUrl: 'https://via.placeholder.com/300x450/D0D0FF/FFFFFF?text=Book+Cover+3',
-    title: "Dune",
-    author: "Frank Herbert",
-    description: "Set on the desert planet Arrakis, Dune is the story of the boy Paul Atreides, who would become the mysterious man known as Muad'Dib. He is propelled into a destiny beyond his understanding, facing betrayal, mysticism, and a unique ecological system.",
-    status: 'Rented',
-    lender: 'Bob Johnson',
-    condition: 'Good',
-  },
-  // ... add other books from your BrowsePage mock data here with unique IDs
-];
-
 const BookDetailPage: React.FC = () => {
-  const { bookId } = useParams<{ bookId: string }>(); // Get the bookId from the URL
+  const { bookId } = useParams<{ bookId: string }>();
+  const location = useLocation();
   const [book, setBook] = useState<Book | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Try to get book from navigation state first
+    const stateBook = location.state?.book;
+    if (stateBook) {
+      setBook(stateBook);
+      setLoading(false);
+      return;
+    }
+    // Otherwise, fetch from API
     if (bookId) {
       setLoading(true);
       setError(null);
-      // Simulate API call to fetch book details by ID
-      const fetchedBook = allMockBooks.find(b => b.id === bookId);
-      if (fetchedBook) {
-        setBook(fetchedBook);
-      } else {
-        setError('Book not found!');
-      }
-      setLoading(false);
+      fetch(`https://bookshare-api.onrender.com/api/book/books/${bookId}/`)
+        .then((res) => {
+          if (!res.ok) throw new Error('Book not found');
+          return res.json();
+        })
+        .then((data) => {
+          setBook({
+            id: String(data.id),
+            imageUrl: data.image,
+            title: data.title,
+            author: data.author,
+            status: data.is_available ? 'Available' : 'Rented',
+            lender: data.lender || 'Unknown',
+            condition: data.condition || 'Unknown',
+            description: data.description,
+          });
+        })
+        .catch(() => setError('Book not found!'))
+        .finally(() => setLoading(false));
     }
-  }, [bookId]); // Re-run effect if bookId changes
+  }, [bookId, location.state]);
 
   if (loading) {
     return <div className="min-h-screen bg-gray-100 flex items-center justify-center">Loading book details...</div>;
@@ -85,7 +68,6 @@ const BookDetailPage: React.FC = () => {
     return <div className="min-h-screen bg-gray-100 flex items-center justify-center">No book data available.</div>;
   }
 
-  // Determine status badge color for the displayed book
   let statusColorClass = '';
   switch (book.status) {
     case 'Available':
@@ -103,8 +85,8 @@ const BookDetailPage: React.FC = () => {
 
   const handleRequestToRent = () => {
     alert(`Requesting to rent "${book.title}"! (Logic to be implemented)`);
-    // In a real application, you would send a request to your backend here.
   };
+
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -117,17 +99,14 @@ const BookDetailPage: React.FC = () => {
               alt={book.title}
               className="w-full h-auto rounded-lg shadow-md"
             />
-            {/* Status Badge - Positioned on Top Right of the image */}
             <span className={`absolute top-2 right-2 px-3 py-1 rounded-full text-xs font-bold ${statusColorClass}`}>
               {book.status}
             </span>
           </div>
-
           {/* Right Section: Book Details */}
           <div className="w-full md:w-2/3">
             <h1 className="text-3xl font-bold text-gray-800 mb-2">{book.title}</h1>
             <p className="text-gray-600 text-lg mb-4">by {book.author}</p>
-
             <div className="flex items-center text-gray-500 text-sm mb-4">
               <svg className="w-4 h-4 mr-1 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                 <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"></path>
@@ -139,12 +118,10 @@ const BookDetailPage: React.FC = () => {
               </svg>
               <span>Condition: {book.condition}</span>
             </div>
-
             <h3 className="text-xl font-bold text-gray-800 mb-2">Description</h3>
             <p className="text-gray-700 mb-6 leading-relaxed">
               {book.description}
             </p>
-
             <button
               onClick={handleRequestToRent}
               className="w-full md:w-auto bg-purple-600 text-white py-3 px-6 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 flex items-center justify-center text-lg font-semibold"
@@ -157,8 +134,7 @@ const BookDetailPage: React.FC = () => {
           </div>
         </div>
       </main>
-
-      <StatusBar /> {/* Local StatusBar for BookDetailPage */}
+      <StatusBar />
     </div>
   );
 };
