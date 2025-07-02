@@ -1,65 +1,69 @@
+// src/pages/loginPage/LoginPage.tsx
 import React, { useState } from "react";
-import { login } from "../../service/auth/login";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-
+  const [error, setError] = useState<string | null>(null); // Initialize as null
   const [loading, setLoading] = useState(false);
 
-  // const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
-  //   e.preventDefault();
-  //   setLoading(true);
-  //   try {
-  //     // const result = await login({ email, password });
-  //     const result = await fetch(
-  //       "https://bookshare-api.onrender.com/api/user/login",
-  //       {
-  //         method: "POST",
-  //         body: JSON.stringify({ email, password }),
-  //       }
-  //     );
-  //     // localStorage.setItem('token', result.token);
-  //     console.log("Logged in successfully:", result);
-  //     // redirect or navigate
-  //   } catch (error) {
-  //     console.log(error);
-  //     setError("Login failed. Please try again.");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+  const navigate = useNavigate(); // Initialize navigate hook
+
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
-  setLoading(true);
-  setError("");
-  try {
-    const result = await fetch(
-      "https://bookshare-api.onrender.com/api/user/login",
-      {
+    e.preventDefault();
+    setLoading(true);
+    setError(null); // Clear previous errors
+
+    // IMPORTANT: Ensure this URL is correct for your Django login endpoint
+    const API_LOGIN_URL = "https://bookshare-api.onrender.com/api/user/login/";
+
+    try {
+      const response = await fetch(API_LOGIN_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ email, password }),
+      });
+
+      if (response.ok) { // Check if the response status is 2xx (success)
+        const data = await response.json();
+        console.log("Logged in successfully:", data);
+
+        // Assuming your Django backend returns a token like this: { "token": "your_auth_token" }
+        if (data.access) {
+          localStorage.setItem('authToken', data.access); // Store the token securely
+          console.log("Token stored:", data.access);
+
+          // Redirect to a protected page, e.g., '/dashboard' or '/browse'
+          navigate('/dashboard'); // Or '/browse', depending on your desired post-login page
+        } else {
+          // If no token is returned but response.ok is true, something is unexpected
+          setError("Login successful, but no authentication token received.");
+        }
+      } else {
+        // Handle API errors (e.g., invalid credentials from Django)
+        const errorData = await response.json();
+        console.error("Login failed:", errorData);
+
+        // Display specific error messages from Django
+        if (errorData.detail) { // Common for invalid credentials in DRF
+          setError(errorData.detail);
+        } else if (errorData.non_field_errors) { // Another common DRF error type
+            setError(errorData.non_field_errors.join(', '));
+        } else {
+          // Fallback for other error structures
+          setError(Object.values(errorData).flat().join(', ') || 'Login failed. Please check your credentials.');
+        }
       }
-    );
-
-    if (!result.ok) {
-      throw new Error("Login failed");
+    } catch (err) {
+      console.error("Network or unexpected error:", err);
+      setError("An unexpected error occurred. Please try again.");
+    } finally {
+      setLoading(false); // Always stop loading
     }
-
-    const data = await result.json();
-    console.log("Logged in successfully:", data);
-    // localStorage.setItem('token', data.token);
-  } catch (error) {
-    console.error(error);
-    setError("Login failed. Please try again.");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -69,7 +73,7 @@ const LoginPage: React.FC = () => {
           Enter your email below to login to your account.
         </p>
 
-        <form method="POST" onSubmit={handleLogin}>
+        <form onSubmit={handleLogin}>
           <div className="mb-4">
             <label
               htmlFor="email"
@@ -80,7 +84,8 @@ const LoginPage: React.FC = () => {
             <input
               type="email"
               id="email"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-blue-50"
+              name="email" // Add name attribute
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-blue-50" // Changed focus ring to purple
               placeholder="m@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -98,20 +103,28 @@ const LoginPage: React.FC = () => {
             <input
               type="password"
               id="password"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="••••••••" // Placeholder for password input
+              name="password" // Add name attribute
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500" // Changed focus ring to purple
+              placeholder="••••••••"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-          {/* Error message */}
-          <div className="text-red-500 text-sm mb-4">{error}</div>
+
+          {/* Error Message Display */}
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+              <span className="block sm:inline">{error}</span>
+            </div>
+          )}
+
           <button
             type="submit"
-            className="w-full bg-purple-600 text-white py-2 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50"
+            className="w-full bg-purple-600 text-white py-2 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={loading} // Disable button when loading
           >
-            Sign in
+            {loading ? 'Signing in...' : 'Sign in'}
           </button>
         </form>
 
