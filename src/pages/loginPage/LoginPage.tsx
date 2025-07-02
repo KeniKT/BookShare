@@ -1,12 +1,14 @@
 // src/pages/loginPage/LoginPage.tsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useAuth } from "../../context/AuthContext";
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null); // Initialize as null
   const [loading, setLoading] = useState(false);
+   const { setAuthenticated } = useAuth();
 
   const navigate = useNavigate(); // Initialize navigate hook
 
@@ -35,7 +37,7 @@ const LoginPage: React.FC = () => {
         if (data.access) {
           localStorage.setItem('authToken', data.access); // Store the token securely
           console.log("Token stored:", data.access);
-
+          setAuthenticated();
           // Redirect to a protected page, e.g., '/dashboard' or '/browse'
           navigate('/dashboard'); // Or '/browse', depending on your desired post-login page
         } else {

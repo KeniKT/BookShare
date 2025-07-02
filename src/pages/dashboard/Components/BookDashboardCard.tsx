@@ -8,7 +8,7 @@ interface Request {
   period: string;
 }
 
-interface Book {
+export interface Book {
   id: string;
   title: string;
   author: string;

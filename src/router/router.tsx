@@ -13,17 +13,22 @@ export const router = createBrowserRouter([
   {
     path: "/",
     element: <LandingPage />,
-    children: [],
   },
   {
     path: "/signup",
     element: <SignUpPage />,
-    children: [],
   },
   {
     path: "/login",
     element: <LoginPage />,
-    children: [],
+  },
+  {
+    path: "/browse",
+    element: <BrowsePage />,
+  },
+  {
+    path: "/bookDetail/:bookId",
+    element: <BookDetailPage />
   },
   {
     element: <DashboardLayout />,
@@ -33,25 +38,12 @@ export const router = createBrowserRouter([
         element: <DashboardPage />,
       },
       {
-        path: "/browse",
-        element: <BrowsePage />,
-        children: [],
-      },
-      {
         path: "/lend",
-        element: <LendBookPage />,
-        children: [],
+        element: <LendBookPage />
       },
       {
         path: "/account",
-        element: <MyAccountPage />,
-        children: [],
-      },
-
-      {
-        path: "/bookDetail/:bookId",
-        element: <BookDetailPage />,
-        children: [],
+        element: <MyAccountPage />
       },
     ],
   },

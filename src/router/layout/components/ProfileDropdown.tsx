@@ -1,5 +1,6 @@
 // src/components/ProfileDropdown.tsx
 import React, { useEffect, useRef } from "react";
+import { useAuth } from "../../../context/AuthContext";
 
 interface ProfileDropdownProps {
   onClose: () => void;
@@ -7,6 +8,7 @@ interface ProfileDropdownProps {
 
 const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ onClose }) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { removeAuthenticated } = useAuth();
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -29,15 +31,9 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ onClose }) => {
     event.preventDefault(); // Prevent the default <a> tag navigation to /logout
 
     // 1. Clear any authentication tokens or user data from localStorage
-    localStorage.removeItem("authToken"); // Adjust 'authToken' to your actual key
-    localStorage.removeItem("userData"); // Adjust 'userData' to your actual key
-    // Add more localStorage.removeItem() calls if you store other user-related data
-
-    // 2. Redirect to the landing page by forcing a full page reload
-    // This effectively navigates to the root path and resets the application state.
-    window.location.href = "/"; // Redirects to your landing page (root path)
-
-    // 3. Close the dropdown
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("userData");
+    removeAuthenticated();
     onClose();
   };
 

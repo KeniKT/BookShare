@@ -1,12 +1,12 @@
 // src/pages/dashboard/DashboardPage.tsx
 import React, { useState } from 'react'; // Import useState
 import DashboardTabs from './Components/DashboardTabs';
-import BookDashboardCard from './Components/BookDashboardCard';
+import BookDashboardCard, { type Book } from './Components/BookDashboardCard';
 import StatusBar from './Components/StatusBar';
 import RentalBookCard from './Components/RentalBookCard'; // Import the new component
 
 // Mock Data (replace with actual data fetching later)
-const mockMyBooks = [ // Renamed from mockBooks for clarity
+const mockMyBooks: Book[] = [ // Renamed from mockBooks for clarity
   {
     id: 'book1',
     title: "The Hitchhiker's Guide to the Galaxy",
@@ -69,7 +69,7 @@ const DashboardPage: React.FC = () => {
           <div className="space-y-6 mt-6">
             {mockMyBooks.length > 0 ? (
               mockMyBooks.map((book) => (
-                <BookDashboardCard key={book.id} book={book} />
+                <BookDashboardCard key={book.id} book={book} onEdit={() => {}} />
               ))
             ) : (
               <p className="text-gray-500 text-center py-8">You don't have any books listed for sharing yet.</p>
