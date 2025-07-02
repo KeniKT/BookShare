@@ -136,6 +136,12 @@ const LoginPage: React.FC = () => {
             Sign up
           </a>
         </p>
+        <p className="text-center text-gray-600 text-sm mt-6">
+          You can browse books without sign in.{" "}
+          <a href="/browse" className="text-purple-600 hover:underline">
+            Browse
+          </a>
+        </p>
       </div>
     </div>
   );
