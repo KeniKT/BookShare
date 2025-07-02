@@ -8,6 +8,7 @@ import MyAccountPage from "../pages/myAccountPage/MyAccountPage";
 import SignUpPage from "../pages/signUpPage/SignUpPage";
 import BookDetailPage from "../pages/bookDetailPage/BookDetailPage";
 import DashboardLayout from "./layout/DashboardLayout";
+import ProtectedRoute from "./ProtectedRoute";
 
 export const router = createBrowserRouter([
   {
@@ -22,28 +23,34 @@ export const router = createBrowserRouter([
     path: "/login",
     element: <LoginPage />,
   },
-  {
-    path: "/browse",
-    element: <BrowsePage />,
-  },
-  {
-    path: "/bookDetail/:bookId",
-    element: <BookDetailPage />
-  },
+
   {
     element: <DashboardLayout />,
     children: [
       {
-        path: "/dashboard",
-        element: <DashboardPage />,
+        element: <ProtectedRoute />,
+        children: [
+          {
+            path: "/dashboard",
+            element: <DashboardPage />,
+          },
+          {
+            path: "/lend",
+            element: <LendBookPage />,
+          },
+          {
+            path: "/account",
+            element: <MyAccountPage />,
+          },
+        ],
       },
       {
-        path: "/lend",
-        element: <LendBookPage />
+        path: "/browse",
+        element: <BrowsePage />,
       },
       {
-        path: "/account",
-        element: <MyAccountPage />
+        path: "/bookDetail/:bookId",
+        element: <BookDetailPage />,
       },
     ],
   },
