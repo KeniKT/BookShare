@@ -1,8 +1,5 @@
 // src/pages/lendBookPage/LendBookPage.tsx
 import React, { useState } from 'react';
-
-// Importing the new, local components from the 'components' subfolder
-import Navbar from './components/Navbar';
 import StatusBar from './components/StatusBar';
 
 const LendBookPage: React.FC = () => {
@@ -25,7 +22,6 @@ const LendBookPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-      <Navbar /> {/* This is the new local Navbar */}
 
       <main className="flex-1 p-6 flex items-start justify-center">
         <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-lg mt-8">

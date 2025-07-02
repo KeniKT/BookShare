@@ -7,42 +7,52 @@ import LoginPage from "../pages/loginPage/LoginPage";
 import MyAccountPage from "../pages/myAccountPage/MyAccountPage";
 import SignUpPage from "../pages/signUpPage/SignUpPage";
 import BookDetailPage from "../pages/bookDetailPage/BookDetailPage";
+import DashboardLayout from "./layout/DashboardLayout";
 
 export const router = createBrowserRouter([
-    {
-        path: '/',
-        element: <LandingPage />,
-        children: []
-    },
-        {
-        path: '/dashboard',
+  {
+    path: "/",
+    element: <LandingPage />,
+    children: [],
+  },
+  {
+    path: "/signup",
+    element: <SignUpPage />,
+    children: [],
+  },
+  {
+    path: "/login",
+    element: <LoginPage />,
+    children: [],
+  },
+  {
+    element: <DashboardLayout />,
+    children: [
+      {
+        path: "/dashboard",
         element: <DashboardPage />,
-        children: []
-    },    {
-        path: '/browse',
+      },
+      {
+        path: "/browse",
         element: <BrowsePage />,
-        children: []
-    },    {
-        path: '/lend',
+        children: [],
+      },
+      {
+        path: "/lend",
         element: <LendBookPage />,
-        children: []
-    },    {
-        path: '/login',
-        element: <LoginPage />,
-        children: []
-    },    {
-        path: '/account',
+        children: [],
+      },
+      {
+        path: "/account",
         element: <MyAccountPage />,
-        children: []
-    },    {
-        path: '/signup',
-        element: <SignUpPage />,
-        children: []
-    },
-    {
-        path: '/bookDetail/:bookId',
-        element: <BookDetailPage />,
-        children: []
-    },
+        children: [],
+      },
 
-])
+      {
+        path: "/bookDetail/:bookId",
+        element: <BookDetailPage />,
+        children: [],
+      },
+    ],
+  },
+]);

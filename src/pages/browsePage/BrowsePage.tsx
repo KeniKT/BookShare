@@ -61,7 +61,6 @@ const mockBooks = [
 const BrowsePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-      <Navbar /> {/* Local Navbar for BrowsePage */}
 
       <main className="flex-1 p-6">
         <h1 className="text-3xl font-bold text-gray-800 mb-8">Browse Books</h1>

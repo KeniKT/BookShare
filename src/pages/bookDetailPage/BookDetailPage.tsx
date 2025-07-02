@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom'; // Import useParams
 
 // Importing the new, local components from the 'components' subfolder
-import Navbar from './components/Navbar';
 import StatusBar from './components/StatusBar';
 
 // Define the type for a Book (matching your mock data structure)
@@ -109,8 +108,6 @@ const BookDetailPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-      <Navbar /> {/* Local Navbar for BookDetailPage */}
-
       <main className="flex-1 p-6 flex items-start justify-center">
         <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-4xl mt-8 flex flex-col md:flex-row">
           {/* Left Section: Book Image */}

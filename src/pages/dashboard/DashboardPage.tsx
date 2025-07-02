@@ -1,6 +1,5 @@
 // src/pages/dashboard/DashboardPage.tsx
 import React, { useState } from 'react'; // Import useState
-import Navbar from './Components/Navbar';
 import DashboardTabs from './Components/DashboardTabs';
 import BookDashboardCard from './Components/BookDashboardCard';
 import StatusBar from './Components/StatusBar';
@@ -57,8 +56,6 @@ const DashboardPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-      <Navbar />
-
       <main className="flex-1 p-6">
         <h1 className="text-3xl font-bold text-gray-800 mb-6">Dashboard</h1>
 

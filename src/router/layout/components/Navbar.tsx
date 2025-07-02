@@ -1,7 +1,6 @@
-// src/pages/lendBookPage/components/Navbar.tsx
+// src/components/Navbar.tsx
 import React, { useState } from 'react';
-// Import ProfileDropdown from the same 'components' folder
-import ProfileDropdown from './ProfileDropdown'; 
+import ProfileDropdown from './ProfileDropdown'; // Import the dropdown component
 
 const Navbar: React.FC = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -9,14 +8,15 @@ const Navbar: React.FC = () => {
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
+  
 
   return (
     <nav className="bg-white border-b border-gray-200 p-4 flex justify-between items-center shadow-sm">
       {/* Left Section: Navigation Links */}
       <div className="flex items-center space-x-6">
         <a href="/browse" className="text-gray-700 hover:text-gray-900 font-semibold">Browse</a>
-        <a href="/dashboard" className="text-gray-700 hover:text-gray-900 font-semibold">Dashboard</a>
-        <a href="/lend" className="text-gray-900 font-bold border-b-2 border-purple-600 pb-1">Lend a Book</a>
+        <a href="/dashboard" className="text-gray-900 font-bold border-b-2 border-purple-600 pb-1">Dashboard</a>
+        <a href="/lend" className="text-gray-700 hover:text-gray-900 font-semibold">Lend a Book</a>
       </div>
 
       {/* Right Section: User Profile */}
