@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import DashboardTabs from './Components/DashboardTabs';
 import BookDashboardCard from './Components/BookDashboardCard';
-import StatusBar from './Components/StatusBar';
 import RentalBookCard from './Components/RentalBookCard';
 
 const BOOKS_API = 'https://bookshare-api.onrender.com/api/book/books/mine/';
@@ -29,32 +28,45 @@ const DashboardPage: React.FC = () => {
         });
         if (!booksRes.ok) throw new Error('Failed to fetch books');
         const booksData = await booksRes.json();
+
         // Fetch all rental requests
         const requestsRes = await fetch(RENTALS_API, {
           headers: { 'Authorization': `Bearer ${ACCESS_TOKEN}` }
         });
         if (!requestsRes.ok) throw new Error('Failed to fetch rental requests');
         const requestsData = await requestsRes.json();
-        // Attach requests to each book
-        const booksWithRequests = booksData.map((book: any) => ({
-          ...book,
-          id: String(book.id),
-          status: book.is_available ? 'Available' : 'Rented',
-          requests: requestsData.filter((req: any) => req.book === book.id && req.status === 'pending').map((req: any) => ({
-            id: String(req.id),
-            requester: `User ${req.renter}`,
-            period: `${req.start_date} to ${req.end_date}`,
-            start_date: req.start_date,
-            end_date: req.end_date,
-          })),
-        }));
+
+        // Attach requests and activeRentalId to each book
+        const booksWithRequests = booksData.map((book: any) => {
+          // Find the accepted rental for this book (active rental)
+          const activeRental = requestsData.find(
+            (req: any) => req.book === book.id && req.status === 'accepted'
+          );
+          return {
+            ...book,
+            id: String(book.id),
+            status: book.is_available ? 'Available' : 'Rented',
+            requests: requestsData
+              .filter((req: any) => req.book === book.id && req.status === 'pending')
+              .map((req: any) => ({
+                id: String(req.id),
+                requester: `User ${req.renter}`,
+                period: `${req.start_date} to ${req.end_date}`,
+                start_date: req.start_date,
+                end_date: req.end_date,
+              })),
+            activeRentalId: activeRental ? String(activeRental.id) : undefined,
+          };
+        });
         setMyBooks(booksWithRequests);
+
         // Fetch my rentals
         const myRentalsRes = await fetch(MY_RENTALS_API, {
           headers: { 'Authorization': `Bearer ${ACCESS_TOKEN}` }
         });
         if (!myRentalsRes.ok) throw new Error('Failed to fetch my rentals');
         const myRentalsData = await myRentalsRes.json();
+
         // Map rentals for RentalBookCard
         // Build a map of bookId to book title for quick lookup
         const bookIdToTitle: Record<string, string> = {};
@@ -121,7 +133,6 @@ const DashboardPage: React.FC = () => {
           </div>
         )}
       </main>
-      <StatusBar issuesCount={3} />
     </div>
   );
 };
