@@ -14,7 +14,6 @@ const DashboardPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'myBooks' | 'myRentals'>('myBooks');
   const [myBooks, setMyBooks] = useState<any[]>([]);
   const [myRentals, setMyRentals] = useState<any[]>([]);
-  const [rentalRequests, setRentalRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
