@@ -6,9 +6,11 @@ interface Request {
   id: string;
   requester: string;
   period: string;
+  start_date?: string;
+  end_date?: string;
 }
 
-export interface Book {
+interface Book {
   id: string;
   title: string;
   author: string;
@@ -23,11 +25,17 @@ interface BookDashboardCardProps {
   onEdit: (book: Book) => void; // New prop: function to call when Edit is clicked
 }
 
+const ACCESS_TOKEN = localStorage.getItem('authToken') || '';
+
 const BookDashboardCard: React.FC<BookDashboardCardProps> = ({ book, onEdit }) => {
   const [showRequests, setShowRequests] = useState(false);
+  const [requestLoading, setRequestLoading] = useState<string | null>(null);
+  const [requestError, setRequestError] = useState<string | null>(null);
+  const [requests, setRequests] = useState(book.requests || []);
+  const [localStatus, setLocalStatus] = useState(book.status);
 
   let statusColorClass = '';
-  switch (book.status) {
+  switch (localStatus) {
     case 'Available':
       statusColorClass = 'bg-green-500 text-white';
       break;
@@ -41,14 +49,46 @@ const BookDashboardCard: React.FC<BookDashboardCardProps> = ({ book, onEdit }) =
       statusColorClass = 'bg-gray-500 text-white';
   }
 
-  const handleApprove = (requestId: string) => {
-    alert(`Approved request ${requestId} for ${book.title}`);
-    // Implement actual approval logic (e.g., API call)
+  const handleApprove = async (requestId: string) => {
+    setRequestLoading(requestId);
+    setRequestError(null);
+    try {
+      const res = await fetch(`https://bookshare-api.onrender.com/api/rental/rentals/${requestId}/accept/`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${ACCESS_TOKEN}`,
+          'Accept': '*/*',
+        },
+      });
+      if (!res.ok) throw new Error('Failed to accept request');
+      // Remove the request from the list (or update status if you want to show it differently)
+      setRequests(prev => prev.filter(r => r.id !== requestId));
+      setLocalStatus('Rented'); // Update status immediately
+    } catch (err: any) {
+      setRequestError(err.message || 'An error occurred');
+    } finally {
+      setRequestLoading(null);
+    }
   };
 
-  const handleReject = (requestId: string) => {
-    alert(`Rejected request ${requestId} for ${book.title}`);
-    // Implement actual rejection logic (e.g., API call)
+  const handleReject = async (requestId: string) => {
+    setRequestLoading(requestId);
+    setRequestError(null);
+    try {
+      const res = await fetch(`https://bookshare-api.onrender.com/api/rental/rentals/${requestId}/decline/`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${ACCESS_TOKEN}`,
+          'Accept': '*/*',
+        },
+      });
+      if (!res.ok) throw new Error('Failed to decline request');
+      setRequests(prev => prev.filter(r => r.id !== requestId));
+    } catch (err: any) {
+      setRequestError(err.message || 'An error occurred');
+    } finally {
+      setRequestLoading(null);
+    }
   };
 
   return (
@@ -59,12 +99,11 @@ const BookDashboardCard: React.FC<BookDashboardCardProps> = ({ book, onEdit }) =
           <h3 className="text-lg font-semibold text-gray-800">{book.title}</h3>
           <p className="text-gray-600 text-sm">{book.author}</p>
         </div>
-
         {/* Status and Actions */}
         <div className="flex items-center space-x-4">
           {/* Status Badge */}
           <span className={`px-3 py-1 rounded-full text-xs font-bold ${statusColorClass}`}>
-            {book.status}
+            {localStatus}
           </span>
 
           {/* Request Button */}
@@ -98,9 +137,10 @@ const BookDashboardCard: React.FC<BookDashboardCardProps> = ({ book, onEdit }) =
       </div>
 
       {/* Incoming Requests Section (if applicable) */}
-      {showRequests && book.requests && book.requests.length > 0 && (
+      {showRequests && requests && requests.length > 0 && (
         <div className="bg-gray-50 p-4 border-t border-gray-200">
           <h4 className="font-semibold text-gray-700 mb-3">Incoming Rental Requests</h4>
+          {requestError && <div className="text-red-500 text-sm mb-2">{requestError}</div>}
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-100">
@@ -109,7 +149,10 @@ const BookDashboardCard: React.FC<BookDashboardCardProps> = ({ book, onEdit }) =
                     Requested by
                   </th>
                   <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Period
+                    Start Date
+                  </th>
+                  <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    End Date
                   </th>
                   <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
@@ -117,18 +160,22 @@ const BookDashboardCard: React.FC<BookDashboardCardProps> = ({ book, onEdit }) =
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {book.requests.map(request => (
+                {requests.map(request => (
                   <tr key={request.id}>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-800">
                       {request.requester}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-800">
-                      {request.period}
+                      {request.start_date}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-800">
+                      {request.end_date}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
                       <button
                         onClick={() => handleApprove(request.id)}
-                        className="text-green-600 hover:text-green-900 mr-2"
+                        className={`text-green-600 hover:text-green-900 mr-2 ${requestLoading === request.id ? 'opacity-50 pointer-events-none' : ''}`}
+                        disabled={requestLoading === request.id}
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -136,7 +183,8 @@ const BookDashboardCard: React.FC<BookDashboardCardProps> = ({ book, onEdit }) =
                       </button>
                       <button
                         onClick={() => handleReject(request.id)}
-                        className="text-red-600 hover:text-red-900"
+                        className={`text-red-600 hover:text-red-900 ${requestLoading === request.id ? 'opacity-50 pointer-events-none' : ''}`}
+                        disabled={requestLoading === request.id}
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>

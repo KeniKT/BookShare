@@ -16,14 +16,16 @@ interface RentalBookCardProps {
 const RentalBookCard: React.FC<RentalBookCardProps> = ({ rental }) => {
   // Determine status color
   let statusColorClass = '';
-  switch (rental.status) {
-    case 'Confirmed':
+  switch (rental.status.toLowerCase()) {
+    case 'confirmed':
+    case 'accepted':
       statusColorClass = 'bg-green-100 text-green-800';
       break;
-    case 'Pending':
+    case 'pending':
       statusColorClass = 'bg-yellow-100 text-yellow-800';
       break;
-    case 'Overdue':
+    case 'declined':
+    case 'overdue':
       statusColorClass = 'bg-red-100 text-red-800';
       break;
     default:

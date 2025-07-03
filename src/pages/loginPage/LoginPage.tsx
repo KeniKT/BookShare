@@ -1,6 +1,6 @@
 // src/pages/loginPage/LoginPage.tsx
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { Link, useNavigate } from "react-router-dom"; // Import useNavigate
 import { useAuth } from "../../context/AuthContext";
 
 const LoginPage: React.FC = () => {
@@ -132,15 +132,15 @@ const LoginPage: React.FC = () => {
 
         <p className="text-center text-gray-600 text-sm mt-6">
           Don't have an account?{" "}
-          <a href="/signup" className="text-purple-600 hover:underline">
+          <Link to="/signup" className="text-purple-600 hover:underline">
             Sign up
-          </a>
+          </Link>
         </p>
         <p className="text-center text-gray-600 text-sm mt-6">
           You can browse books without sign in.{" "}
-          <a href="/browse" className="text-purple-600 hover:underline">
+          <Link to="/browse" className="text-purple-600 hover:underline">
             Browse
-          </a>
+          </Link>
         </p>
       </div>
     </div>
