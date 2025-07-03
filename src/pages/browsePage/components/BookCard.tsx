@@ -1,10 +1,10 @@
 // src/pages/browsePage/components/BookCard.tsx
 import React from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom';
 
 interface Book {
   id: string;
-  imageUrl?: string; // Optional image URL
+  imageUrl?: string;
   title: string;
   author: string;
   description: string;
@@ -13,12 +13,10 @@ interface Book {
 
 interface BookCardProps {
   book: Book;
-  // onClick prop is no longer strictly needed for navigation if we use useNavigate directly
-  // onClick?: (bookId: string) => void;
 }
 
-const BookCard: React.FC<BookCardProps> = ({ book /*, onClick */ }) => {
-  const navigate = useNavigate(); // Initialize useNavigate hook
+const BookCard: React.FC<BookCardProps> = ({ book }) => {
+  const navigate = useNavigate();
 
   let statusColorClass = '';
   switch (book.status) {
@@ -36,41 +34,42 @@ const BookCard: React.FC<BookCardProps> = ({ book /*, onClick */ }) => {
   }
 
   const handleCardClick = () => {
-    // Navigate to the BookDetail page using the book's ID
-    // We'll define a route like '/books/:bookId' for this.
-    navigate(`/bookDetail/${book.id}`); // This is the key change!
+    navigate(`/bookDetail/${book.id}`);
     console.log(`Navigating to book: ${book.title} (ID: ${book.id})`);
-    // The previous onClick prop logic is replaced by direct navigation
-    // if (onClick) {
-    //   onClick(book.id);
-    // }
   };
 
   return (
     <div
-      className="bg-white rounded-lg shadow-md overflow-hidden relative cursor-pointer hover:shadow-lg transition-shadow duration-200 w-[250px] h-[500px] flex flex-col"
+      className="bg-white rounded-xl shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow duration-300 flex flex-col w-full max-w-sm sm:max-w-xs"
       onClick={handleCardClick}
     >
-      {/* Book Image Placeholder */}
-      <div className="w-full h-[350px] bg-gray-200 flex items-center justify-center text-gray-500 text-sm font-semibold overflow-hidden">
+      {/* Image section with consistent aspect ratio */}
+      <div className="relative w-full aspect-[2/3] bg-gray-100">
         {book.imageUrl ? (
-          <img src={book.imageUrl} alt={book.title} className="w-full h-full object-cover" />
+          <img
+            src={book.imageUrl}
+            alt={book.title}
+            className="w-full h-full object-contain"
+          />
         ) : (
-          <span>300 x 450</span>
+          <div className="flex items-center justify-center w-full h-full text-gray-400 text-sm font-semibold">
+            No Image
+          </div>
         )}
+
+        {/* Status badge */}
+        <span
+          className={`absolute top-2 right-2 px-3 py-1 rounded-full text-xs font-bold shadow-md ${statusColorClass}`}
+        >
+          {book.status}
+        </span>
       </div>
 
-      {/* Status Badge - POSITIONED ON TOP RIGHT */}
-      <span className={`absolute top-2 right-2 px-3 py-1 rounded-full text-xs font-bold ${statusColorClass}`}>
-        {book.status}
-      </span>
-
-      <div className="p-4 flex-1 flex flex-col">
-        <h3 className="text-lg font-bold text-gray-800 mb-1 line-clamp-1">{book.title}</h3>
-        <p className="text-gray-600 text-sm mb-2 line-clamp-1">{book.author}</p>
-        <p className="text-gray-500 text-xs line-clamp-3 flex-1">
-          {book.description}
-        </p>
+      {/* Book info */}
+      <div className="p-4 flex flex-col gap-1">
+        <h3 className="text-lg font-semibold text-gray-800 truncate">{book.title}</h3>
+        <p className="text-sm text-gray-600 truncate">{book.author}</p>
+        <p className="text-xs text-gray-500 line-clamp-3">{book.description}</p>
       </div>
     </div>
   );
