@@ -18,6 +18,7 @@ interface Book {
   requests?: Request[];
   description?: string; // Add description to the type
   condition?: string; // Add condition to the type
+  activeRentalId?: string; // <-- Add this
 }
 
 interface BookDashboardCardProps {
@@ -33,6 +34,7 @@ const BookDashboardCard: React.FC<BookDashboardCardProps> = ({ book, onEdit }) =
   const [requestError, setRequestError] = useState<string | null>(null);
   const [requests, setRequests] = useState(book.requests || []);
   const [localStatus, setLocalStatus] = useState(book.status);
+  const [returnLoading, setReturnLoading] = useState(false);
 
   let statusColorClass = '';
   switch (localStatus) {
@@ -91,6 +93,31 @@ const BookDashboardCard: React.FC<BookDashboardCardProps> = ({ book, onEdit }) =
     }
   };
 
+  // Handle returning a rented book
+  const handleReturn = async () => {
+    if (!book.activeRentalId) {
+      setRequestError('No active rental found for this book.');
+      return;
+    }
+    setReturnLoading(true);
+    setRequestError(null);
+    try {
+      const res = await fetch(`https://bookshare-api.onrender.com/api/rental/rentals/${book.activeRentalId}/return/`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${ACCESS_TOKEN}`,
+          'Accept': '*/*',
+        },
+      });
+      if (!res.ok) throw new Error('Failed to return book');
+      setLocalStatus('Available');
+    } catch (err: any) {
+      setRequestError(err.message || 'An error occurred');
+    } finally {
+      setReturnLoading(false);
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg border border-gray-200 mb-4 overflow-hidden">
       <div className="p-4 flex justify-between items-center">
@@ -105,6 +132,17 @@ const BookDashboardCard: React.FC<BookDashboardCardProps> = ({ book, onEdit }) =
           <span className={`px-3 py-1 rounded-full text-xs font-bold ${statusColorClass}`}>
             {localStatus}
           </span>
+
+          {/* Returned Button: Only show if status is Rented */}
+          {localStatus === 'Rented' && (
+            <button
+              onClick={handleReturn}
+              disabled={returnLoading}
+              className="bg-blue-600 text-white px-3 py-1 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
+            >
+              {returnLoading ? 'Returning...' : 'Returned'}
+            </button>
+          )}
 
           {/* Request Button */}
           {book.requests && book.requests.length > 0 && (
