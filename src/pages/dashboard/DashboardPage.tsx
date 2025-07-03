@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/pages/dashboard/DashboardPage.tsx
 import React, { useState, useEffect } from 'react';
 import DashboardTabs from './Components/DashboardTabs';
