@@ -32,7 +32,7 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ onClose }) => {
 
     // 1. Clear any authentication tokens or user data from localStorage
     localStorage.removeItem("authToken");
-   window.location.href = "/login";
+    window.location.href = "/";
     onClose();
   };
 
