@@ -1,7 +1,6 @@
 // src/pages/bookDetailPage/BookDetailPage.tsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
-import StatusBar from './components/StatusBar';
 
 // Define the type for a Book (matching API fields)
 interface Book {
@@ -274,7 +273,6 @@ const handleSubmitRequest = async (e: React.FormEvent) => {
           </div>
         </div>
       </main>
-      <StatusBar />
     </div>
   );
 };

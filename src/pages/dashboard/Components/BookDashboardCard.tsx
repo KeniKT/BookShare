@@ -16,10 +16,11 @@ interface Book {
   author: string;
   status: 'Available' | 'Rented' | 'Requested';
   requests?: Request[];
-  description?: string; // Add description to the type
-  condition?: string; // Add condition to the type
-  activeRentalId?: string; // <-- Add this
+  description?: string;
+  condition?: string;
+  activeRentalId?: string;
 }
+
 
 interface BookDashboardCardProps {
   book: Book;

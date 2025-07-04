@@ -1,9 +1,6 @@
 // src/pages/myAccountPage/MyAccountPage.tsx
 import React, { useState, useRef, useEffect } from 'react'; // Import useRef and useEffect
 
-// Importing the local components from the 'components' subfolder
-import StatusBar from './components/StatusBar';
-
 const API_URL = 'https://bookshare-api.onrender.com/api/user/me/';
 // Use the correct key for the access token
 const ACCESS_TOKEN = localStorage.getItem('authToken') || '';
@@ -256,8 +253,6 @@ const MyAccountPage: React.FC = () => {
           )}
         </div>
       </main>
-
-      <StatusBar /> {/* Local StatusBar for MyAccountPage */}
     </div>
   );
 };

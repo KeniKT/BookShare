@@ -1,8 +1,5 @@
 // src/pages/browsePage/BrowsePage.tsx
 import React, { useEffect, useState } from 'react';
-
-// Importing the new, local components from the 'components' subfolder
-import StatusBar from './components/StatusBar';
 import BookCard from './components/BookCard';
 
 // Define the type for a book from the API
@@ -65,8 +62,6 @@ const BrowsePage: React.FC = () => {
           </div>
         )}
       </main>
-
-      <StatusBar issuesCount={3} /> {/* Local StatusBar for BrowsePage */}
     </div>
   );
 };

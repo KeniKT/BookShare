@@ -1,104 +1,153 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/pages/dashboard/DashboardPage.tsx
 import React, { useState, useEffect } from 'react';
 import DashboardTabs from './Components/DashboardTabs';
 import BookDashboardCard from './Components/BookDashboardCard';
 import RentalBookCard from './Components/RentalBookCard';
 
-const BOOKS_API = 'https://bookshare-api.onrender.com/api/book/books/mine/';
-const RENTALS_API = 'https://bookshare-api.onrender.com/api/rental/rentals/';
-const MY_RENTALS_API = 'https://bookshare-api.onrender.com/api/rental/rentals/mine/';
-const ACCESS_TOKEN = localStorage.getItem('authToken') || '';
+// -------------------------
+// API Endpoints & Helpers
+// -------------------------
+const API = {
+  MY_BOOKS: 'https://bookshare-api.onrender.com/api/book/books/mine/',
+  ALL_RENTALS: 'https://bookshare-api.onrender.com/api/rental/rentals/',
+  MY_RENTALS: 'https://bookshare-api.onrender.com/api/rental/rentals/mine/',
+};
 
+const getAuthHeaders = () => ({
+  Authorization: `Bearer ${localStorage.getItem('authToken') || ''}`,
+});
+
+// -------------------------
+// Types
+// -------------------------
+interface Book {
+  id: string;
+  title: string;
+  is_available: boolean;
+  author: string; // ✅ Added
+}
+
+interface Rental {
+  id: string | number;
+  book: string | number;
+  renter: string | number;
+  lender?: string | number;
+  status: string;
+  start_date: string;
+  end_date: string;
+}
+
+interface BookWithRequests extends Book {
+  status: 'Available' | 'Rented'; // ✅ Fixed
+  requests: {
+    id: string;
+    requester: string;
+    period: string;
+    start_date: string;
+    end_date: string;
+  }[];
+  activeRentalId?: string;
+}
+
+interface MappedRental {
+  id: string;
+  title: string;
+  lender: string;
+  status: string;
+  dueDate: string;
+}
+
+// -------------------------
+// Dashboard Page
+// -------------------------
 const DashboardPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'myBooks' | 'myRentals'>('myBooks');
-  const [myBooks, setMyBooks] = useState<any[]>([]);
-  const [myRentals, setMyRentals] = useState<any[]>([]);
+  const [myBooks, setMyBooks] = useState<BookWithRequests[]>([]);
+  const [myRentals, setMyRentals] = useState<MappedRental[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchDashboardData = async () => {
       setLoading(true);
       setError(null);
+
       try {
-        // Fetch my books
-        const booksRes = await fetch(BOOKS_API, {
-          headers: { 'Authorization': `Bearer ${ACCESS_TOKEN}` }
-        });
-        if (!booksRes.ok) throw new Error('Failed to fetch books');
-        const booksData = await booksRes.json();
+        const booksRes = await fetch(API.MY_BOOKS, { headers: getAuthHeaders() });
+        if (!booksRes.ok) throw new Error('Failed to fetch your books.');
+        const booksData: Book[] = await booksRes.json();
 
-        // Fetch all rental requests
-        const requestsRes = await fetch(RENTALS_API, {
-          headers: { 'Authorization': `Bearer ${ACCESS_TOKEN}` }
-        });
-        if (!requestsRes.ok) throw new Error('Failed to fetch rental requests');
-        const requestsData = await requestsRes.json();
+        const rentalsRes = await fetch(API.ALL_RENTALS, { headers: getAuthHeaders() });
+        if (!rentalsRes.ok) throw new Error('Failed to fetch rental requests.');
+        const allRentals: Rental[] = await rentalsRes.json();
 
-        // Attach requests and activeRentalId to each book
-        const booksWithRequests = booksData.map((book: any) => {
-          // Find the accepted rental for this book (active rental)
-          const activeRental = requestsData.find(
-            (req: any) => req.book === book.id && req.status === 'accepted'
+        const booksWithRequests: BookWithRequests[] = booksData.map((book) => {
+          const activeRental = allRentals.find(
+            (rental) => rental.book === book.id && rental.status === 'accepted'
           );
+
+          const requests = allRentals
+            .filter((rental) => rental.book === book.id && rental.status === 'pending')
+            .map((rental) => ({
+              id: String(rental.id),
+              requester: `User ${rental.renter}`,
+              period: `${rental.start_date} to ${rental.end_date}`,
+              start_date: rental.start_date,
+              end_date: rental.end_date,
+            }));
+
+          const status: 'Available' | 'Rented' = book.is_available ? 'Available' : 'Rented';
+
           return {
             ...book,
             id: String(book.id),
-            status: book.is_available ? 'Available' : 'Rented',
-            requests: requestsData
-              .filter((req: any) => req.book === book.id && req.status === 'pending')
-              .map((req: any) => ({
-                id: String(req.id),
-                requester: `User ${req.renter}`,
-                period: `${req.start_date} to ${req.end_date}`,
-                start_date: req.start_date,
-                end_date: req.end_date,
-              })),
+            status,
+            requests,
             activeRentalId: activeRental ? String(activeRental.id) : undefined,
           };
         });
+
         setMyBooks(booksWithRequests);
 
-        // Fetch my rentals
-        const myRentalsRes = await fetch(MY_RENTALS_API, {
-          headers: { 'Authorization': `Bearer ${ACCESS_TOKEN}` }
-        });
-        if (!myRentalsRes.ok) throw new Error('Failed to fetch my rentals');
-        const myRentalsData = await myRentalsRes.json();
+        const myRentalsRes = await fetch(API.MY_RENTALS, { headers: getAuthHeaders() });
+        if (!myRentalsRes.ok) throw new Error('Failed to fetch your rentals.');
+        const myRentalsData: Rental[] = await myRentalsRes.json();
 
-        // Map rentals for RentalBookCard
-        // Build a map of bookId to book title for quick lookup
-        const bookIdToTitle: Record<string, string> = {};
-        booksData.forEach((book: any) => {
-          bookIdToTitle[String(book.id)] = book.title;
-        });
-        const mappedRentals = myRentalsData.map((rental: any) => ({
+        const bookTitleMap = Object.fromEntries(
+          booksData.map((book) => [String(book.id), book.title])
+        );
+
+        const mappedRentals = myRentalsData.map((rental) => ({
           id: String(rental.id),
-          title: bookIdToTitle[String(rental.book)] || `Book #${rental.book}`,
+          title: bookTitleMap[String(rental.book)] || `Book #${rental.book}`,
           lender: `User ${rental.lender || ''}`,
           status: rental.status,
           dueDate: rental.end_date || '',
         }));
+
         setMyRentals(mappedRentals);
-      } catch (err: any) {
-        setError(err.message || 'An error occurred');
+      } catch (err) {
+        console.error(err);
+        setError((err as Error).message || 'An unexpected error occurred.');
       } finally {
         setLoading(false);
       }
     };
-    fetchData();
+
+    fetchDashboardData();
   }, []);
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <main className="flex-1 p-6">
         <h1 className="text-3xl font-bold text-gray-800 mb-6">Dashboard</h1>
+
         <DashboardTabs
           activeTab={activeTab}
           onTabChange={setActiveTab}
           myBooksCount={myBooks.length}
         />
+
         {loading ? (
           <div className="text-center text-gray-500 mt-8">Loading...</div>
         ) : error ? (
@@ -110,7 +159,9 @@ const DashboardPage: React.FC = () => {
                 <BookDashboardCard key={book.id} book={book} onEdit={() => {}} />
               ))
             ) : (
-              <p className="text-gray-500 text-center py-8">You don't have any books listed for sharing yet.</p>
+              <p className="text-gray-500 text-center py-8">
+                You don't have any books listed for sharing yet.
+              </p>
             )}
           </div>
         ) : (
@@ -127,7 +178,9 @@ const DashboardPage: React.FC = () => {
                   <RentalBookCard key={rental.id} rental={rental} />
                 ))
               ) : (
-                <p className="text-gray-500 text-center py-8">You currently have no borrowed books.</p>
+                <p className="text-gray-500 text-center py-8">
+                  You currently have no borrowed books.
+                </p>
               )}
             </div>
           </div>

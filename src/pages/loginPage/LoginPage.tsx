@@ -1,14 +1,12 @@
 // src/pages/loginPage/LoginPage.tsx
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom"; // Import useNavigate
-import { useAuth } from "../../context/AuthContext";
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null); // Initialize as null
   const [loading, setLoading] = useState(false);
-   const { setAuthenticated } = useAuth();
 
   const navigate = useNavigate(); // Initialize navigate hook
 
@@ -31,13 +29,10 @@ const LoginPage: React.FC = () => {
 
       if (response.ok) { // Check if the response status is 2xx (success)
         const data = await response.json();
-        console.log("Logged in successfully:", data);
 
         // Assuming your Django backend returns a token like this: { "token": "your_auth_token" }
         if (data.access) {
           localStorage.setItem('authToken', data.access); // Store the token securely
-          console.log("Token stored:", data.access);
-          setAuthenticated();
           // Redirect to a protected page, e.g., '/dashboard' or '/browse'
           navigate('/dashboard'); // Or '/browse', depending on your desired post-login page
         } else {

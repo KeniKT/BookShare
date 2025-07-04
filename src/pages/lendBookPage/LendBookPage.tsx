@@ -1,7 +1,6 @@
 // src/pages/lendBookPage/LendBookPage.tsx
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import StatusBar from './components/StatusBar';
 
 const API_URL = 'https://bookshare-api.onrender.com/api/book/books/';
 const ACCESS_TOKEN = localStorage.getItem('authToken') || '';
@@ -220,8 +219,6 @@ const LendBookPage: React.FC = () => {
           </form>
         </div>
       </main>
-
-      <StatusBar issuesCount={3} />
     </div>
   );
 };
