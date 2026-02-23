@@ -1,176 +1,286 @@
 // src/pages/signUpPage/SignUpPage.tsx
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate for redirection
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const SignUpPage: React.FC = () => {
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const navigate = useNavigate(); // Initialize navigate hook
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); // Prevent default form submission behavior
-
+    e.preventDefault();
     setLoading(true);
     setError(null);
     setSuccess(null);
 
-    // Define your Django backend base URL
-    // IMPORTANT: Replace with your actual Django backend URL (e.g., 'http://localhost:8000')
-    const API_BASE_URL = 'https://bookshare-api.onrender.com'; // <<< CHANGE THIS TO YOUR DJANGO BACKEND URL
+    const API_BASE_URL = "https://bookshare-api.onrender.com";
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/user/create/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          first_name: firstName, // Django often expects snake_case for fields
+          first_name: firstName,
           last_name: lastName,
-          email: email,
-          password: password,
+          email,
+          password,
         }),
       });
 
-      if (response.ok) { // Check if the response status is 2xx (success)
+      if (response.ok) {
         const data = await response.json();
-        setSuccess('Account created successfully! Redirecting to login...');
-        console.log('Signup successful:', data);
-        // Redirect to login page after a short delay
-        setTimeout(() => {
-          navigate('/login');
-        }, 2000);
+        setSuccess("Account created successfully! Redirecting to login…");
+        setTimeout(() => navigate("/login"), 2000);
       } else {
-        // Handle API errors (e.g., validation errors from Django)
         const errorData = await response.json();
-        console.error('Signup failed:', errorData);
-
-        // Display specific error messages from Django
-        if (errorData.email) {
-          setError(`Email: ${errorData.email.join(', ')}`);
-        } else if (errorData.password) {
-          setError(`Password: ${errorData.password.join(', ')}`);
-        } else if (errorData.detail) { // Generic error from Django REST Framework
-          setError(errorData.detail);
-        } else {
-          setError('Signup failed. Please check your input.');
-        }
+        if (errorData.email) setError(`Email: ${errorData.email.join(", ")}`);
+        else if (errorData.password) setError(`Password: ${errorData.password.join(", ")}`);
+        else if (errorData.detail) setError(errorData.detail);
+        else setError("Signup failed. Please check your input.");
       }
     } catch (err) {
-      console.error('Network or unexpected error:', err);
-      setError('An unexpected error occurred. Please try again.');
+      setError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
+  const inputStyle: React.CSSProperties = {
+    width: "100%", boxSizing: "border-box",
+    background: "rgba(7, 39, 67, 0.6)",
+    border: "1px solid rgba(2, 145, 181, 0.2)",
+    borderRadius: "10px", padding: "12px 14px",
+    color: "#e2e8f0", fontSize: "14px",
+    outline: "none", transition: "border-color 0.2s",
+    fontFamily: "inherit",
+  };
+
+  const labelStyle: React.CSSProperties = {
+    display: "block", fontSize: "12px", fontWeight: 600,
+    color: "rgba(148, 163, 184, 0.8)", marginBottom: "8px",
+    letterSpacing: "0.05em", textTransform: "uppercase",
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center mb-2">Sign Up</h2>
-        <p className="text-gray-600 text-center mb-6">Create your account to start sharing and borrowing.</p>
+    <div style={{
+      minHeight: "100vh",
+      background: "linear-gradient(160deg, #072743 0%, #0d1f35 50%, #12213F 100%)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      padding: "24px", fontFamily: "'DM Sans', 'Segoe UI', sans-serif",
+      position: "relative", overflow: "hidden",
+    }}>
+      {/* Background glow orbs */}
+      <div style={{
+        position: "absolute", top: "10%", right: "10%",
+        width: "400px", height: "400px", borderRadius: "50%",
+        background: "radial-gradient(circle, rgba(2, 145, 181, 0.07) 0%, transparent 70%)",
+        pointerEvents: "none",
+      }} />
+      <div style={{
+        position: "absolute", bottom: "10%", left: "8%",
+        width: "300px", height: "300px", borderRadius: "50%",
+        background: "radial-gradient(circle, rgba(6, 104, 134, 0.08) 0%, transparent 70%)",
+        pointerEvents: "none",
+      }} />
+      {/* Grid overlay */}
+      <div style={{
+        position: "absolute", inset: 0,
+        backgroundImage: `linear-gradient(rgba(2, 145, 181, 0.03) 1px, transparent 1px),
+                          linear-gradient(90deg, rgba(2, 145, 181, 0.03) 1px, transparent 1px)`,
+        backgroundSize: "60px 60px", pointerEvents: "none",
+      }} />
+
+      {/* Card */}
+      <div style={{
+        width: "100%", maxWidth: "440px",
+        background: "linear-gradient(135deg, rgba(17, 57, 94, 0.6), rgba(7, 39, 67, 0.8))",
+        border: "1px solid rgba(2, 145, 181, 0.2)",
+        borderRadius: "20px", padding: "40px 36px",
+        backdropFilter: "blur(16px)",
+        boxShadow: "0 24px 80px rgba(0, 0, 0, 0.4)",
+        position: "relative", zIndex: 1,
+      }}>
+        {/* Logo mark */}
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: "28px" }}>
+          <div style={{
+            width: "48px", height: "48px",
+            background: "linear-gradient(135deg, #066886, #0291B5)",
+            borderRadius: "13px",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            boxShadow: "0 6px 20px rgba(2, 145, 181, 0.4)",
+          }}>
+            <svg width="24" height="24" fill="none" stroke="white" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+          </div>
+        </div>
+
+        {/* Heading */}
+        <h2 style={{
+          fontFamily: "'Playfair Display', Georgia, serif",
+          fontSize: "26px", fontWeight: 800,
+          color: "#e2e8f0", textAlign: "center",
+          margin: "0 0 8px", letterSpacing: "-0.02em",
+        }}>
+          Create account
+        </h2>
+        <p style={{
+          color: "rgba(148, 163, 184, 0.7)", textAlign: "center",
+          fontSize: "14px", margin: "0 0 32px", lineHeight: 1.5,
+        }}>
+          Start sharing and borrowing books today
+        </p>
 
         <form onSubmit={handleSubmit}>
-          {/* First Name Input */}
-          <div className="mb-4">
-            <label htmlFor="firstName" className="block text-gray-700 text-sm font-semibold mb-2">
-              First Name
-            </label>
+          {/* First + Last name row */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px", marginBottom: "18px" }}>
+            <div>
+              <label style={labelStyle}>First Name</label>
+              <input
+                type="text" placeholder="Max"
+                value={firstName} onChange={(e) => setFirstName(e.target.value)}
+                required style={inputStyle}
+                onFocus={e => (e.target.style.borderColor = "rgba(2, 145, 181, 0.6)")}
+                onBlur={e => (e.target.style.borderColor = "rgba(2, 145, 181, 0.2)")}
+              />
+            </div>
+            <div>
+              <label style={labelStyle}>Last Name</label>
+              <input
+                type="text" placeholder="Robinson"
+                value={lastName} onChange={(e) => setLastName(e.target.value)}
+                required style={inputStyle}
+                onFocus={e => (e.target.style.borderColor = "rgba(2, 145, 181, 0.6)")}
+                onBlur={e => (e.target.style.borderColor = "rgba(2, 145, 181, 0.2)")}
+              />
+            </div>
+          </div>
+
+          {/* Email */}
+          <div style={{ marginBottom: "18px" }}>
+            <label style={labelStyle}>Email</label>
             <input
-              type="text"
-              id="firstName"
-              name="firstName" // Add name attribute for consistency
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-blue-50"
-              placeholder="Max"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              required
+              type="email" placeholder="you@example.com"
+              value={email} onChange={(e) => setEmail(e.target.value)}
+              required style={inputStyle}
+              onFocus={e => (e.target.style.borderColor = "rgba(2, 145, 181, 0.6)")}
+              onBlur={e => (e.target.style.borderColor = "rgba(2, 145, 181, 0.2)")}
             />
           </div>
 
-          {/* Last Name Input */}
-          <div className="mb-4">
-            <label htmlFor="lastName" className="block text-gray-700 text-sm font-semibold mb-2">
-              Last Name
-            </label>
-            <input
-              type="text"
-              id="lastName"
-              name="lastName" // Add name attribute
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-blue-50"
-              placeholder="Robinson"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              required
-            />
+          {/* Password */}
+          <div style={{ marginBottom: "24px" }}>
+            <label style={labelStyle}>Password</label>
+            <div style={{ position: "relative" }}>
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="••••••••"
+                value={password} onChange={(e) => setPassword(e.target.value)}
+                required
+                style={{ ...inputStyle, padding: "12px 42px 12px 14px" }}
+                onFocus={e => (e.target.style.borderColor = "rgba(2, 145, 181, 0.6)")}
+                onBlur={e => (e.target.style.borderColor = "rgba(2, 145, 181, 0.2)")}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: "absolute", right: "12px", top: "50%",
+                  transform: "translateY(-50%)", background: "none",
+                  border: "none", cursor: "pointer",
+                  color: "rgba(148, 163, 184, 0.5)", padding: "2px",
+                }}
+              >
+                {showPassword ? (
+                  <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                  </svg>
+                ) : (
+                  <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                )}
+              </button>
+            </div>
           </div>
 
-          {/* Email Input */}
-          <div className="mb-4">
-            <label htmlFor="email" className="block text-gray-700 text-sm font-semibold mb-2">
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email" // Add name attribute
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-blue-50"
-              placeholder="m@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-
-          {/* Password Input */}
-          <div className="mb-6">
-            <label htmlFor="password" className="block text-gray-700 text-sm font-semibold mb-2">
-              Password
-            </label>
-            <input
-              type="password"
-              id="password"
-              name="password" // Add name attribute
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-
-          {/* Error and Success Messages */}
+          {/* Error */}
           {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-              <span className="block sm:inline">{error}</span>
-            </div>
-          )}
-          {success && (
-            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
-              <span className="block sm:inline">{success}</span>
+            <div style={{
+              background: "rgba(239, 68, 68, 0.1)",
+              border: "1px solid rgba(248, 113, 113, 0.3)",
+              borderRadius: "10px", padding: "12px 14px",
+              color: "#F87171", fontSize: "13px", marginBottom: "20px",
+              display: "flex", alignItems: "center", gap: "8px",
+            }}>
+              <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {error}
             </div>
           )}
 
-          {/* Create account Button */}
+          {/* Success */}
+          {success && (
+            <div style={{
+              background: "rgba(6, 104, 134, 0.15)",
+              border: "1px solid rgba(2, 145, 181, 0.35)",
+              borderRadius: "10px", padding: "12px 14px",
+              color: "#0291B5", fontSize: "13px", marginBottom: "20px",
+              display: "flex", alignItems: "center", gap: "8px",
+            }}>
+              <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {success}
+            </div>
+          )}
+
+          {/* Submit */}
           <button
             type="submit"
-            className="w-full bg-purple-600 text-white py-2 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={loading} // Disable button while loading
+            disabled={loading}
+            style={{
+              width: "100%",
+              background: loading ? "rgba(6, 104, 134, 0.5)" : "linear-gradient(135deg, #066886, #0291B5)",
+              border: "none", color: "#fff",
+              fontSize: "15px", fontWeight: 700,
+              padding: "13px 0", borderRadius: "11px",
+              cursor: loading ? "not-allowed" : "pointer",
+              boxShadow: loading ? "none" : "0 6px 24px rgba(2, 145, 181, 0.4)",
+              transition: "all 0.2s", fontFamily: "inherit",
+              letterSpacing: "0.02em",
+            }}
+            onMouseEnter={e => {
+              if (!loading) (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 8px 32px rgba(2, 145, 181, 0.55)";
+            }}
+            onMouseLeave={e => {
+              if (!loading) (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 6px 24px rgba(2, 145, 181, 0.4)";
+            }}
           >
-            {loading ? 'Creating account...' : 'Create account'}
+            {loading ? "Creating account…" : "Create account"}
           </button>
         </form>
 
-        {/* Login Link */}
-        <p className="text-center text-gray-600 text-sm mt-6">
-          Already have an account?{' '}
-          <a href="/login" className="text-purple-600 hover:underline">
+        {/* Divider */}
+        <div style={{
+          height: "1px", margin: "24px 0",
+          background: "linear-gradient(90deg, transparent, rgba(2, 145, 181, 0.2), transparent)",
+        }} />
+
+        {/* Footer link */}
+        <p style={{ textAlign: "center", color: "rgba(148, 163, 184, 0.6)", fontSize: "13px", margin: 0 }}>
+          Already have an account?{" "}
+          <a href="/login" style={{ color: "#0291B5", textDecoration: "none", fontWeight: 600 }}>
             Login
           </a>
         </p>
