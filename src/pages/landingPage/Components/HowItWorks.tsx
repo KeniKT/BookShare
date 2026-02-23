@@ -1,5 +1,4 @@
 // src/pages/landingPage/Components/HowItWorks.tsx
-import React from "react";
 
 const features = [
   {

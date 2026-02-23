@@ -1,5 +1,4 @@
 // src/pages/landingPage/Components/Footer.tsx
-import React from "react";
 
 const Footer = () => {
   const year = new Date().getFullYear();

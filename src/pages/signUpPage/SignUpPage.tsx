@@ -35,7 +35,7 @@ const SignUpPage: React.FC = () => {
       });
 
       if (response.ok) {
-        const data = await response.json();
+        await response.json();
         setSuccess("Account created successfully! Redirecting to login…");
         setTimeout(() => navigate("/login"), 2000);
       } else {
